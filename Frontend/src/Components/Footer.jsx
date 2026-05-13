@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 
 const Footer = () => (
@@ -9,9 +10,9 @@ const Footer = () => (
         <div className="md:col-span-1">
           <div className="flex items-center gap-2 mb-4">
 
-            <span className="font-display bg-white rounded-3xl text-xl mt-4 font-bold tracking-tight text-black">
+            <Link to={'/'} className="font-display bg-white rounded-3xl text-xl mt-4 font-bold tracking-tight text-black">
                 <img width={"200"} src={logo} alt="" />
-            </span>
+            </Link>
           </div>
 
           <p className="text-sm leading-[1.7] text-gray-400">

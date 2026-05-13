@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route} from "react-router-dom";
 import { Toaster } from "sonner";
 import { routes, getPageRoutes } from "./routes";
 import Navbar from "./Components/Navbar";
@@ -6,9 +6,9 @@ import Footer from "./Components/Footer";
 import FloatingNavigator from "./Components/FloatingNavigator";
 
 function AppContent() {
-  const location = useLocation();
+  // const location = useLocation();
 
-  const showFooter = ["/", "/login", "/register"].includes(location.pathname);
+  // const showFooter = ["/", "/login", "/register"].includes(location.pathname);
 
   return (
     <div className="noise min-h-screen bg-white text-black">
@@ -23,7 +23,7 @@ function AppContent() {
         </Routes>
       </div>
 
-      {showFooter && <Footer />}
+       <Footer />
 
       <FloatingNavigator pageRoutes={getPageRoutes()} />
     </div>

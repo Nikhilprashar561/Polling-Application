@@ -56,7 +56,7 @@ const PollResultsPage = () => {
   ];
 
   return (
-    <div className="noise min-h-screen bg-gray-50 px-4 py-16">
+    <div className="noise mt-5 min-h-screen bg-gray-50 px-4 py-16">
       
       <div className="mx-auto max-w-2xl">
         

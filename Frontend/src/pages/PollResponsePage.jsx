@@ -34,7 +34,7 @@ const PollResponsePage = () => {
   ];
 
   return (
-    <div className="noise flex min-h-screen items-center justify-center bg-gray-50 px-4 py-16">
+    <div className="noise flex mt-5 min-h-screen items-center justify-center bg-gray-50 px-4 py-16">
       
       <div className="w-full max-w-xl">
         
