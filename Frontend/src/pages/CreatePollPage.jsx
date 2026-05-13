@@ -1,7 +1,7 @@
 import InputField from "../Components/InputField";
 import Sidebar from "../Components/Sidebar";
 
-const CreatePollPage = ({ onNavigate }) => {
+const CreatePollPage = () => {
   const questions = [
     {
       text: "Which feature should we prioritize?",
@@ -28,10 +28,7 @@ const CreatePollPage = ({ onNavigate }) => {
   return (
     <div className="flex min-h-screen pt-16 noise">
       
-      <Sidebar 
-        active="create-poll"
-        onNavigate={onNavigate}
-      />
+      <Sidebar />
 
       <main className="flex-1 max-w-3xl px-6 py-8">
         

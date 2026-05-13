@@ -1,6 +1,6 @@
 import Sidebar from "../Components/Sidebar";
 
-const DashboardPage = ({ onNavigate }) => {
+const DashboardPage = () => {
   const polls = [
     {
       title: "Product Feedback Q3",
@@ -48,10 +48,7 @@ const DashboardPage = ({ onNavigate }) => {
 
   return (
     <div className="flex min-h-screen pt-16 noise">
-      <Sidebar
-        active="dashboard"
-        onNavigate={onNavigate}
-      />
+      <Sidebar />
 
       <main className="flex-1 overflow-auto px-6 py-8">
         

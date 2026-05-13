@@ -1,21 +1,44 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "./Logo";
 
-const Navbar = ({ onNavigate, page }) => {
+const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const isDashboard = [
-    "dashboard",
-    "create-poll",
-    "user",
-    "poll-response",
-    "poll-results",
-  ].includes(page); 
+  const dashboardPages = ["/dashboard", "/create-poll", "/user", "/poll-response", "/poll-results"];
+  const isDashboard = dashboardPages.includes(location.pathname);
+
+  const getPathName = () => {
+    switch (location.pathname) {
+      case "/":
+        return "home";
+      case "/login":
+        return "login";
+      case "/register":
+        return "register";
+      case "/dashboard":
+        return "dashboard";
+      case "/create-poll":
+        return "create-poll";
+      case "/poll-response":
+        return "poll-response";
+      case "/poll-results":
+        return "poll-results";
+      case "/user":
+        return "user";
+      default:
+        return "home";
+    }
+  };
+
+  const currentPage = getPathName();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
       <div className="max-w-7xl h-16 mx-auto px-6 flex items-center justify-between">
-        <Logo onClick={() => onNavigate("home")} />
+        <Logo onClick={() => navigate("/")} />
 
         {/* Desktop nav */}
         {!isDashboard && (
@@ -35,9 +58,9 @@ const Navbar = ({ onNavigate, page }) => {
         {isDashboard && (
           <div className="hidden md:flex items-center gap-6">
             <span
-              onClick={() => onNavigate("dashboard")}
+              onClick={() => navigate("/dashboard")}
               className={`relative text-sm cursor-pointer transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-black after:transition-all after:duration-300 hover:after:w-full ${
-                page === "dashboard"
+                currentPage === "dashboard"
                   ? "font-semibold text-black after:w-full"
                   : "text-gray-500 hover:text-black after:w-0"
               }`}
@@ -46,9 +69,9 @@ const Navbar = ({ onNavigate, page }) => {
             </span>
 
             <span
-              onClick={() => onNavigate("create-poll")}
+              onClick={() => navigate("/create-poll")}
               className={`relative text-sm cursor-pointer transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-black after:transition-all after:duration-300 hover:after:w-full ${
-                page === "create-poll"
+                currentPage === "create-poll"
                   ? "font-semibold text-black after:w-full"
                   : "text-gray-500 hover:text-black after:w-0"
               }`}
@@ -63,14 +86,14 @@ const Navbar = ({ onNavigate, page }) => {
           {!isDashboard ? (
             <>
               <button
-                onClick={() => onNavigate("login")}
+                onClick={() => navigate("/login")}
                 className="px-6 py-2 text-sm font-medium cursor-pointer rounded-full border border-gray-200 text-black transition-all duration-200 hover:border-black"
               >
                 Sign In
               </button>
 
               <button
-                onClick={() => onNavigate("register")}
+                onClick={() => navigate("/register")}
                 className="px-5 py-2 text-sm font-medium cursor-pointer rounded-full bg-black text-white transition-all duration-200 hover:opacity-90"
               >
                 Get Started
@@ -79,7 +102,7 @@ const Navbar = ({ onNavigate, page }) => {
           ) : (
             <div className="flex items-center gap-3">
               <button
-                onClick={() => onNavigate("user")}
+                onClick={() => navigate("/user")}
                 className="w-9 h-9 flex items-center cursor-pointer justify-center rounded-full bg-black text-white text-sm font-semibold"
               >
                 JD
@@ -131,7 +154,7 @@ const Navbar = ({ onNavigate, page }) => {
           <div className="flex flex-col gap-3 pt-4 border-t border-gray-100">
             <button
               onClick={() => {
-                onNavigate("login");
+                navigate("/login");
                 setMenuOpen(false);
               }}
               className="w-full py-3 cursor-pointer text-sm font-medium rounded-full border border-gray-200 transition-all duration-200 hover:border-black"
@@ -141,7 +164,7 @@ const Navbar = ({ onNavigate, page }) => {
 
             <button
               onClick={() => {
-                onNavigate("register");
+                navigate("/register");
                 setMenuOpen(false);
               }}
               className="w-full py-3 cursor-pointer text-sm font-medium rounded-full bg-black text-white transition-all duration-200 hover:opacity-90"

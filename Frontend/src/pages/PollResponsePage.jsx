@@ -1,5 +1,5 @@
 
-const PollResponsePage = ({ onNavigate }) => {
+const PollResponsePage = () => {
   const questions = [
     {
       text: "Which feature would you like to see next?",

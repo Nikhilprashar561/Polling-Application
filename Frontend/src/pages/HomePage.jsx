@@ -1,4 +1,8 @@
-const HomePage = ({ onNavigate }) => {
+import { useNavigate } from "react-router-dom";
+
+const HomePage = () => {
+  const navigate = useNavigate();
+  
   const features = [
     {
       icon: "⚡",
@@ -100,14 +104,14 @@ const HomePage = ({ onNavigate }) => {
 
           <div className="animate-fade-up anim-delay-3 flex flex-wrap gap-3">
             <button
-              onClick={() => onNavigate("register")}
+              onClick={() => navigate("/register")}
               className="btn-primary rounded-full bg-black px-8 py-3.5 text-sm font-semibold text-white"
             >
               Start for free →
             </button>
 
             <button
-              onClick={() => onNavigate("poll-response")}
+              onClick={() => navigate("/poll-response")}
               className="rounded-full border border-gray-200 px-8 py-3.5 text-sm font-medium text-black transition-colors duration-200 hover:border-black"
             >
               See a live demo
@@ -311,13 +315,8 @@ const HomePage = ({ onNavigate }) => {
             real opinions?
           </h2>
 
-          <p className="mx-auto mb-10 max-w-md text-lg text-gray-400">
-            Join thousands of teams using PollStack to make smarter,
-            data-driven decisions.
-          </p>
-
           <button
-            onClick={() => onNavigate("register")}
+            onClick={() => navigate("/register")}
             className="btn-primary rounded-full bg-white px-10 py-4 text-sm font-bold text-black"
           >
             Create your first poll — it's free

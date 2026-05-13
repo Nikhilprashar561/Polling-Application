@@ -1,9 +1,9 @@
 import InputField from "../Components/InputField";
 import Sidebar from "../Components/Sidebar";
 
-const UserPage = ({ onNavigate }) => (
+const UserPage = () => (
   <div className="flex min-h-screen pt-16 bg-white">
-    <Sidebar active="user" onNavigate={onNavigate} />
+    <Sidebar />
 
     <main className="flex-1 max-w-2xl px-6 py-8 overflow-y-auto">
       {/* Header */}

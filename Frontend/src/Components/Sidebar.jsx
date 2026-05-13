@@ -1,8 +1,28 @@
-const Sidebar = ({ active, onNavigate }) => {
+import { useNavigate, useLocation } from "react-router-dom";
+
+const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const getPageIdFromPath = () => {
+    switch (location.pathname) {
+      case "/dashboard":
+        return "dashboard";
+      case "/create-poll":
+        return "create-poll";
+      case "/user":
+        return "user";
+      default:
+        return "";
+    }
+  };
+
+  const active = getPageIdFromPath();
+
   const items = [
-    { id: "dashboard", icon: "▦", label: "Dashboard" },
-    { id: "create-poll", icon: "+", label: "Create Poll" },
-    { id: "user", icon: "◎", label: "Profile" },
+    { id: "dashboard", icon: "▦", label: "Dashboard", path: "/dashboard" },
+    { id: "create-poll", icon: "+", label: "Create Poll", path: "/create-poll" },
+    { id: "user", icon: "◎", label: "Profile", path: "/user" },
   ];
 
   return (
@@ -13,7 +33,7 @@ const Sidebar = ({ active, onNavigate }) => {
         {items.map((item, index) => (
           <button
             key={item.id}
-            onClick={() => onNavigate(item.id)}
+            onClick={() => navigate(item.path)}
             className={`nav-item animate-fade-up flex w-full items-center gap-3 rounded-xl border-0 px-4 py-3 text-left text-sm font-medium cursor-pointer ${
               active === item.id ? "active" : ""
             }`}

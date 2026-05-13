@@ -4,9 +4,16 @@ import { db } from "../../../db/index.js";
 import { usersTable } from "../../../db/schema.js";
 import { eq } from "drizzle-orm";
 
-import { hashPassword, verifyPassword } from "../../common/utils/passwordCheck.js";
+import {
+  hashPassword,
+  verifyPassword,
+} from "../../common/utils/passwordCheck.js";
 import { ApiResponse } from "../../common/utils/ApiResponse.js";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../common/utils/jwt.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../../common/utils/jwt.js";
 import { ApiError } from "../../common/utils/ApiError.js";
 
 interface registerUser {
@@ -21,7 +28,6 @@ interface loginUser {
 }
 
 class authControllers {
-
   public async register(
     req: Request<{}, {}, registerUser>,
     res: Response,
@@ -213,7 +219,8 @@ class authControllers {
   }
 
   public async refreshToken(req: Request, res: Response): Promise<void> {
-    const refreshTokenFromCookie = req.cookies?.refreshToken;
+    const refreshTokenFromCookie =
+      req.cookies?.refreshToken || req.headers.authorization?.split(" ")[1];
 
     if (!refreshTokenFromCookie)
       throw ApiError.unauthorized("Refresh token is missing");
