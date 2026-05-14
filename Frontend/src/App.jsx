@@ -1,9 +1,10 @@
-import { BrowserRouter, Routes, Route} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { routes, getPageRoutes } from "./routes";
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import FloatingNavigator from "./Components/FloatingNavigator";
+import { AppProvider } from "./context/AppProvider";
 
 function AppContent() {
   // const location = useLocation();
@@ -23,7 +24,7 @@ function AppContent() {
         </Routes>
       </div>
 
-       <Footer />
+      <Footer />
 
       <FloatingNavigator pageRoutes={getPageRoutes()} />
     </div>
@@ -33,7 +34,9 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
     </BrowserRouter>
   );
 }
