@@ -10,21 +10,21 @@ pollingRouter
   .post(authMiddleware, pollingContollers.createPoll.bind(pollingContollers));
 
 pollingRouter
-  .route("/createQuestion")
+  .route("/createQuestion/:pollId")
   .post(
     authMiddleware,
     pollingContollers.createQuestion.bind(pollingContollers),
   );
 
 pollingRouter
-  .route("/createOptions")
+  .route("/finalSubmission/:pollId")
   .post(
     authMiddleware,
-    pollingContollers.createOptions.bind(pollingContollers),
+    pollingContollers.finalSubmission.bind(pollingContollers),
   );
 
 pollingRouter
-  .route("/getPoll/:link")
+  .route("/getPoll/:link/:pollId")
   .get(pollingContollers.getCreatedPoll.bind(pollingContollers));
 
 pollingRouter

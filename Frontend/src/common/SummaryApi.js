@@ -44,8 +44,8 @@ export const summaryApiPolling = {
     url: `${POLLING_API_URL}/createQuestion`,
     method: "post",
   },
-  createOption: {
-    url: `${POLLING_API_URL}/createOptions`,
+  finalSubmission: {
+    url: `${POLLING_API_URL}/finalSubmission`,
     method: "post",
   },
   getPoll: {

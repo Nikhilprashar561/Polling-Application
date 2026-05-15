@@ -37,11 +37,11 @@ export const pollService = {
     }
   },
 
-  async createOption(optionData) {
+  async finalSubmission(finalSubmissionData) {
     try {
       const response = await axiosRequest({
-        ...summaryApiPolling.createOption,
-        data: optionData,
+        ...summaryApiPolling.finalSubmission,
+        data: finalSubmissionData,
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
