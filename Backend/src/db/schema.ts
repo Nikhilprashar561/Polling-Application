@@ -94,21 +94,22 @@ export const pollSubmissionsTable = pgTable("poll_submissions", {
 });
 
 export const responsesTable = pgTable("responses", {
-  id: uuid("id").primaryKey().defaultRandom(),
-
-  questionId: uuid("question_id")
-    .notNull()
-    .references(() => questionsTable.id, { onDelete: "cascade" }),
+  id: uuid("id").defaultRandom().primaryKey(),
 
   submissionId: uuid("submission_id")
-    .notNull()
-    .references(() => pollSubmissionsTable.id, { onDelete: "cascade" }),
-    
-  respondentId: uuid("respondent_id").references(() => usersTable.id, {
-    onDelete: "set null",
-  }),
+    .references(() => pollSubmissionsTable.id),
 
-  submittedAt: timestamp("submitted_at", { withTimezone: true })
-    .notNull()
+  pollId: uuid("poll_id")
+    .references(() => pollsTable.id),
+
+  questionId: uuid("question_id")
+    .references(() => questionsTable.id),
+
+  respondentId: uuid("respondent_id")
+    .references(() => usersTable.id),
+
+  selectedOption: text("selected_option").notNull(),
+
+  createdAt: timestamp("created_at")
     .defaultNow(),
 });

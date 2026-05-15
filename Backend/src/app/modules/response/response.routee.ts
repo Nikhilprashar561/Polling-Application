@@ -6,18 +6,18 @@ const responseRouter = Router();
 const responseControllers = new responsePollingController();
 
 responseRouter
-  .route("/submitPoll")
+  .route("/submitPoll:/pollId/:pollLink")
   .post(responseControllers.submitFinalPoll.bind(responseControllers));
 
 responseRouter
-  .route("/expirePoll/:id")
+  .route("/expirePoll/:pollId")
   .post(
     authMiddleware,
     responseControllers.creatorPollSubmit.bind(responseControllers),
   );
 
 responseRouter
-  .route("/results/:link")
+  .route("/results/:pollLink")
   .get(responseControllers.finalPollResult.bind(responseControllers));
 
 responseRouter
