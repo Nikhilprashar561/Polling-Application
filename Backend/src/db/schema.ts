@@ -35,7 +35,7 @@ export const usersTable = pgTable("users", {
     .$onUpdate(() => new Date()),
 });
 
-export const polls = pgTable("polls", {
+export const pollsTable = pgTable("polls", {
   id: uuid("id").primaryKey().defaultRandom(),
   createdBy: uuid("created_by")
     .references(() => usersTable.id, { onDelete: "cascade" })
@@ -59,11 +59,11 @@ export const polls = pgTable("polls", {
     .defaultNow(),
 });
 
-export const questions = pgTable("questions", {
+export const questionsTable = pgTable("questions", {
   id: uuid("id").primaryKey().defaultRandom(),
   pollId: uuid("poll_id")
     .notNull()
-    .references(() => polls.id, { onDelete: "cascade" }),
+    .references(() => pollsTable.id, { onDelete: "cascade" }),
 
   questionText: text("question_text").notNull(),
   isRequired: boolean("is_required").notNull().default(true),
@@ -78,12 +78,12 @@ export const questions = pgTable("questions", {
     .defaultNow(),
 });
 
-export const pollSubmissions = pgTable("poll_submissions", {
+export const pollSubmissionsTable = pgTable("poll_submissions", {
   id: uuid("id").primaryKey().defaultRandom(),
 
   pollId: uuid("poll_id")
     .notNull()
-    .references(() => polls.id, { onDelete: "cascade" }),
+    .references(() => pollsTable.id, { onDelete: "cascade" }),
   respondentId: uuid("respondent_id").references(() => usersTable.id, {
     onDelete: "set null",
   }),
@@ -93,16 +93,16 @@ export const pollSubmissions = pgTable("poll_submissions", {
     .defaultNow(),
 });
 
-export const responses = pgTable("responses", {
+export const responsesTable = pgTable("responses", {
   id: uuid("id").primaryKey().defaultRandom(),
 
   questionId: uuid("question_id")
     .notNull()
-    .references(() => questions.id, { onDelete: "cascade" }),
+    .references(() => questionsTable.id, { onDelete: "cascade" }),
 
   submissionId: uuid("submission_id")
     .notNull()
-    .references(() => pollSubmissions.id, { onDelete: "cascade" }),
+    .references(() => pollSubmissionsTable.id, { onDelete: "cascade" }),
     
   respondentId: uuid("respondent_id").references(() => usersTable.id, {
     onDelete: "set null",

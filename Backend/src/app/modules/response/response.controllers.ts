@@ -1,5 +1,8 @@
+import type { Request, Response } from "express";
+import {} from '../../../db/schema.js'
+
 class responsePollingController {
-  public async submitFinalPoll() {
+  public async submitFinalPoll(req: Request, res: Response) {
     // User Can Submit Poll Means Final Poll Submission
 
     // Get Data From Request , Means Questions Answers
@@ -28,7 +31,7 @@ class responsePollingController {
 
   }
 
-  public async creatorPollSubmit() {
+  public async creatorPollSubmit(req: Request, res: Response) {
     // creator can expire this poll anytime they want and Publis the poll
 
     // Creator can manually expire or close poll or Publis
@@ -46,7 +49,7 @@ class responsePollingController {
     // Return updated poll response
   }
 
-  public async finalPollResult() {
+  public async finalPollResult(req: Request, res: Response) {
     // via link if they expire
     // when creator finalize the poll automaticaly convert to result
 
@@ -67,7 +70,7 @@ class responsePollingController {
     // Return poll result response
   }
 
-  public async completedPolls() {
+  public async completedPolls(req: Request, res: Response) {
     // All completed Polls
 
     // Get all completed or expired polls
@@ -80,7 +83,7 @@ class responsePollingController {
     // Return completed polls response
   }
 
-  public async getPollAnalytics() {
+  public async getPollAnalytics(req: Request, res: Response) {
     // Extract pollId from params
 
     // Verify poll exists

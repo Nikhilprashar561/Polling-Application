@@ -37,11 +37,11 @@ export async function authMiddleware(
 
     if (!user) throw ApiError.unauthorized("User not found");
 
-    // @ts-ignore
+   
     req.user = {
       userId: user?.id,
       email: user?.email,
-      fullname: user?.fullName,
+      fullName: user?.fullName,
     };
 
     next();

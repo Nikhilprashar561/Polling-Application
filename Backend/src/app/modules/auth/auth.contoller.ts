@@ -286,7 +286,6 @@ class authControllers {
     req: Request<{ id: string }>,
     res: Response,
   ): Promise<void> {
-    // @ts-ignore
     const authenticatedUserId = req.user?.userId;
     const { id } = req.params;
 

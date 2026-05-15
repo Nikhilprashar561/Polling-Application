@@ -24,11 +24,11 @@ pollingRouter
   );
 
 pollingRouter
-  .route("/getPoll/:link/:pollId")
+  .route("/getPoll/:link")
   .get(pollingContollers.getCreatedPoll.bind(pollingContollers));
 
 pollingRouter
-  .route("/updatePoll/:id")
+  .route("/updatePoll/:pollId")
   .patch(
     authMiddleware,
     pollingContollers.updatePollDetails.bind(pollingContollers),
@@ -42,14 +42,14 @@ pollingRouter
   );
 
 pollingRouter
-  .route("/deletePoll/:id")
+  .route("/deletePoll/:pollId")
   .delete(
     authMiddleware,
     pollingContollers.deletedPoll.bind(pollingContollers),
   );
 
 pollingRouter
-  .route("/deleteQuestion/:id")
+  .route("/deleteQuestion/:questionId")
   .delete(
     authMiddleware,
     pollingContollers.deleteQuestion.bind(pollingContollers),
