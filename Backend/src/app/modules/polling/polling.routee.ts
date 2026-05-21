@@ -11,48 +11,31 @@ pollingRouter
 
 pollingRouter
   .route("/createQuestion/:pollId")
-  .post(
-    authMiddleware,
-    pollingContollers.createQuestion.bind(pollingContollers),
-  );
+  .post(authMiddleware, pollingContollers.createQuestion.bind(pollingContollers));
 
 pollingRouter
   .route("/finalSubmission/:pollId")
-  .post(
-    authMiddleware,
-    pollingContollers.finalSubmission.bind(pollingContollers),
-  );
+  .post(authMiddleware, pollingContollers.finalSubmission.bind(pollingContollers));
 
+// :pollLink param name must match what controller destructures
 pollingRouter
-  .route("/getPoll/:link")
+  .route("/getPoll/:pollId")
   .get(pollingContollers.getCreatedPoll.bind(pollingContollers));
 
 pollingRouter
   .route("/updatePoll/:pollId")
-  .patch(
-    authMiddleware,
-    pollingContollers.updatePollDetails.bind(pollingContollers),
-  );
+  .patch(authMiddleware, pollingContollers.updatePollDetails.bind(pollingContollers));
 
 pollingRouter
   .route("/myPolls/:userId")
-  .get(
-    authMiddleware,
-    pollingContollers.getUserSpecificCreatedPoll.bind(pollingContollers),
-  );
+  .get(authMiddleware, pollingContollers.getUserSpecificCreatedPoll.bind(pollingContollers));
 
 pollingRouter
   .route("/deletePoll/:pollId")
-  .delete(
-    authMiddleware,
-    pollingContollers.deletedPoll.bind(pollingContollers),
-  );
+  .delete(authMiddleware, pollingContollers.deletedPoll.bind(pollingContollers));
 
 pollingRouter
   .route("/deleteQuestion/:questionId")
-  .delete(
-    authMiddleware,
-    pollingContollers.deleteQuestion.bind(pollingContollers),
-  );
+  .delete(authMiddleware, pollingContollers.deleteQuestion.bind(pollingContollers));
 
 export { pollingRouter };

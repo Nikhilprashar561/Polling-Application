@@ -1,13 +1,17 @@
 import { Router } from "express";
 import { responsePollingController } from "./response.controllers.js";
-import { authMiddleware } from "../auth/auth.midlleware.js";
+import { authMiddleware, optionalAuthMiddleware } from "../auth/auth.midlleware.js";
 
 const responseRouter = Router();
 const responseControllers = new responsePollingController();
 
+// Submit poll — optional auth (controller enforces auth if poll requiresAuth=true)
 responseRouter
-  .route("/submitPoll:/pollId/:pollLink")
-  .post(responseControllers.submitFinalPoll.bind(responseControllers));
+  .route("/submitPoll/:pollId")
+  .post(
+    optionalAuthMiddleware,
+    responseControllers.submitFinalPoll.bind(responseControllers),
+  );
 
 responseRouter
   .route("/expirePoll/:pollId")
@@ -22,10 +26,16 @@ responseRouter
 
 responseRouter
   .route("/completedPolls")
-  .get(responseControllers.completedPolls.bind(responseControllers));
+  .get(
+    authMiddleware,
+    responseControllers.completedPolls.bind(responseControllers),
+  );
 
 responseRouter
   .route("/analytics/:pollId")
-  .get(responseControllers.getPollAnalytics.bind(responseControllers));
+  .get(
+    authMiddleware,
+    responseControllers.getPollAnalytics.bind(responseControllers),
+  );
 
 export { responseRouter };

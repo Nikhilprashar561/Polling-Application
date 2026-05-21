@@ -1,21 +1,32 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import AuthLayout from "../Components/AuthLayout";
-import InputField from "../Components/InputField";
+import { authService } from "../services/authService";
+import { useAuth } from "../context/userContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting, isSubmitSuccessful } } = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-      rememberMe: false,
-    }, mode: "all"
+  const { login } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: { email: "", password: "", rememberMe: false },
+    mode: "all",
   });
 
-  const onSubmit = (data) => {
-    console.log("Login data:", data);
-    // Handle login submission here
+  const onSubmit = async (data) => {
+    const result = await authService.userLogin({
+      email: data.email,
+      password: data.password,
+    });
+    if (result?.success) {
+      login(result.data.user, result.data.accessToken);
+      toast.success("Welcome back!");
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -25,7 +36,6 @@ const LoginPage = () => {
       footer={
         <>
           Don't have an account?{" "}
-          
           <span
             onClick={() => navigate("/register")}
             className="underline-hover cursor-pointer font-semibold text-black"
@@ -50,13 +60,11 @@ const LoginPage = () => {
               },
             })}
           />
-          <span className="text-xs leading-relaxed text-gray-500">
-            {errors.email && (
-              <span className="block mb-2 ml-4 text-red-500 text-xs mt-1">
-                {errors.email.message}
-              </span>
-            )}
-          </span>
+          {errors.email && (
+            <span className="block mb-2 ml-4 text-red-500 text-xs mt-1">
+              {errors.email.message}
+            </span>
+          )}
         </label>
 
         <label className="block mb-4 text-sm font-medium text-black">
@@ -67,37 +75,32 @@ const LoginPage = () => {
             placeholder="Min. 8 characters"
             {...register("password", {
               required: "Password is required",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
-              },
+              minLength: { value: 8, message: "Password must be at least 8 characters" },
             })}
           />
-          <span className="text-xs leading-relaxed text-gray-500">
-            {errors.password && (
-              <span className="block mb-2 ml-4 text-red-500 text-xs mt-1">
-                {errors.password.message}
-              </span>
-            )}
-          </span>
+          {errors.password && (
+            <span className="block mb-2 ml-4 text-red-500 text-xs mt-1">
+              {errors.password.message}
+            </span>
+          )}
         </label>
 
         <div className="mb-6 flex items-center justify-between animate-fade-up anim-delay-1">
           <label className="flex cursor-pointer items-center gap-2">
             <input type="checkbox" {...register("rememberMe")} />
-
-            <span className="text-xs text-gray-500">
-              Remember me
-            </span>
+            <span className="text-xs text-gray-500">Remember me</span>
           </label>
-
           <span className="underline-hover cursor-pointer text-xs font-medium text-black">
             Forgot password?
           </span>
         </div>
 
-        <button type="submit" className="btn-primary cursor-pointer w-full rounded-xl bg-black py-3.5 text-sm font-semibold text-white animate-fade-up anim-delay-2">
-          Sign In
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="btn-primary cursor-pointer w-full rounded-xl bg-black py-3.5 text-sm font-semibold text-white animate-fade-up anim-delay-2 disabled:opacity-60"
+        >
+          {isSubmitting ? "Signing in..." : "Sign In"}
         </button>
       </form>
     </AuthLayout>

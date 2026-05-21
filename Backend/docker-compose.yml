@@ -1,15 +1,14 @@
-
 services:
   postgresdb:
     image: postgres:17
     ports:
-      - '5433:5432'
+      - "5434:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_USER: nikhil
+      POSTGRES_PASSWORD: pollstack
+      POSTGRES_DB: pollstack
     volumes:
-      - 'postgres_data:/var/lib/postgresql/data'
+      - "postgres_data:/var/lib/postgresql/data"
 
   valkey:
     image: valkey/valkey

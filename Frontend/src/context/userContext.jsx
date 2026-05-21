@@ -1,11 +1,14 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { tokenStore } from "../utils/tokenStore";
 
 const userContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => tokenStore.getUser());
 
-  const login = (userData) => {
+  const login = (userData, accessToken) => {
+    tokenStore.setAccessToken(accessToken);
+    tokenStore.setUserDerails(userData);
     setUser(userData);
   };
 
@@ -14,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    tokenStore.clear();
     setUser(null);
   };
 
@@ -25,5 +29,5 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => {
-  return useContext(AuthProvider);
+  return useContext(userContext);
 };

@@ -3,7 +3,7 @@ import { axiosRequest } from "../utils/axios";
 import { axiosError } from "../utils/axiosError";
 import { tokenStore } from "../utils/tokenStore";
 
-const accessToken = tokenStore.getAccessToken();
+const getToken = () => tokenStore.getAccessToken();
 
 export const pollService = {
   async createPoll(pollData) {
@@ -11,9 +11,7 @@ export const pollService = {
       const response = await axiosRequest({
         ...summaryApiPolling.createPoll,
         data: pollData,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       return response.data;
     } catch (error) {
@@ -21,48 +19,40 @@ export const pollService = {
     }
   },
 
-  async createQuestion(questionData) {
+  async createQuestion(pollId, questionData) {
     try {
       const response = await axiosRequest({
-        ...summaryApiPolling.createQuestion,
+        url: `${summaryApiPolling.createQuestion.url}/${pollId}`,
+        method: "post",
         data: questionData,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
     }
   },
 
-  async finalSubmission(finalSubmissionData) {
+  async finalSubmission(pollId) {
     try {
       const response = await axiosRequest({
-        ...summaryApiPolling.finalSubmission,
-        data: finalSubmissionData,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        url: `${summaryApiPolling.finalSubmission.url}/${pollId}`,
+        method: "post",
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
     }
   },
 
-  async getPoll(pollLink) {
+  async getPoll(pollId) {
     try {
       const response = await axiosRequest({
-        url: `${summaryApiPolling.getPoll.url}/${pollLink}`,
+        url: `${summaryApiPolling.getPoll.url}/${pollId}`,
         method: "get",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
@@ -74,28 +64,23 @@ export const pollService = {
       const response = await axiosRequest({
         url: `${summaryApiPolling.updatePoll.url}/${id}`,
         method: "patch",
-        data: data,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        data,
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
     }
   },
 
-  async myPolls(id) {
+  async myPolls() {
     try {
+      const user = tokenStore.getUser();
       const response = await axiosRequest({
-        url: `${summaryApiPolling.myPolls.url}/${id}`,
+        url: `${summaryApiPolling.myPolls.url}/${user?.id}`,
         method: "get",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
@@ -107,11 +92,8 @@ export const pollService = {
       const response = await axiosRequest({
         url: `${summaryApiPolling.deletePoll.url}/${id}`,
         method: "delete",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
@@ -123,11 +105,8 @@ export const pollService = {
       const response = await axiosRequest({
         url: `${summaryApiPolling.deleteQuestion.url}/${id}`,
         method: "delete",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);

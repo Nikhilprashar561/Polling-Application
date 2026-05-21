@@ -3,20 +3,31 @@ import { createContext, useContext, useState } from "react";
 const pollContext = createContext();
 
 export const PollContextProvider = ({ children }) => {
-  const [poll, setPoll] = useState([]);
+  const [polls, setPolls] = useState([]);
+  const [currentPoll, setCurrentPoll] = useState(null);
 
-  const createPoll = (pollData) => {
-    setPoll((prev) => [...prev, pollData]);
+  const addPoll = (pollData) => {
+    setPolls((prev) => [pollData, ...prev]);
   };
 
-  const deletePoll = (pollId) => {
-    setPoll((prev) => {
-      prev.filter((poll) => poll.id !== pollId);
-    });
+  const setAllPolls = (pollsData) => {
+    setPolls(pollsData);
+  };
+
+  const removePoll = (pollId) => {
+    setPolls((prev) => prev.filter((p) => p.id !== pollId));
+  };
+
+  const updatePoll = (pollId, updates) => {
+    setPolls((prev) =>
+      prev.map((p) => (p.id === pollId ? { ...p, ...updates } : p))
+    );
   };
 
   return (
-    <pollContext.Provider value={{ poll, createPoll, deletePoll }}>
+    <pollContext.Provider
+      value={{ polls, currentPoll, setCurrentPoll, addPoll, setAllPolls, removePoll, updatePoll }}
+    >
       {children}
     </pollContext.Provider>
   );

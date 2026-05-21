@@ -3,33 +3,17 @@ import { authControllers } from "./auth.contoller.js";
 import { authMiddleware } from "./auth.midlleware.js";
 
 const authRouter = Router();
-
 const authController = new authControllers();
 
-authRouter // Register a USER
-  .route("/register")
-  .post(authController.register.bind(authController));
+authRouter.route("/register").post(authController.register.bind(authController));
+authRouter.route("/login").post(authController.login.bind(authController));
+authRouter.route("/logout").post(authMiddleware, authController.logout.bind(authController));
 
-authRouter.route("/login").post(authController.login.bind(authController)); // Login a USER
+// refreshToken reads from cookie, no auth middleware needed
+authRouter.route("/refresToken").post(authController.refreshToken.bind(authController));
 
-authRouter // Logout a USER
-  .route("/logout")
-  .post(authMiddleware, authController.logout.bind(authController));
-
-authRouter // Generate new Access Token
-  .route("/refresToken")
-  .post(authMiddleware, authController.refreshToken.bind(authController));
-
-authRouter // Update User Credentials
-  .route("/updateDetails")
-  .patch(authMiddleware, authController.updateUserDetails.bind(authController));
-
-authRouter // get user data
-  .route("/getMe/:id")
-  .get(authMiddleware, authController.getUser.bind(authController));
-
-authRouter // delete user
-  .route("/delete/:id")
-  .post(authMiddleware, authController.deleteUser.bind(authController));
+authRouter.route("/updateDetails").patch(authMiddleware, authController.updateUserDetails.bind(authController));
+authRouter.route("/getMe/:id").get(authMiddleware, authController.getUser.bind(authController));
+authRouter.route("/delete/:id").delete(authMiddleware, authController.deleteUser.bind(authController));
 
 export { authRouter };

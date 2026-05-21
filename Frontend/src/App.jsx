@@ -13,7 +13,7 @@ function AppContent() {
 
   return (
     <div className="noise min-h-screen bg-white text-black">
-      <Toaster position="top-right" />
+      <Toaster expand={true} position="top-right" />
       <Navbar />
 
       <div className="min-h-screen">

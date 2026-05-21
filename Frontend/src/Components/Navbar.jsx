@@ -1,39 +1,34 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "./Logo";
+import { useAuth } from "../context/userContext";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
-  const dashboardPages = ["/dashboard", "/create-poll", "/user", "/poll-response", "/poll-results"];
-  const isDashboard = dashboardPages.includes(location.pathname);
+  const dashboardPages = ["/dashboard", "/create-poll", "/user", "/poll-results"];
+  const isDashboard = dashboardPages.some((p) => location.pathname.startsWith(p));
 
   const getPathName = () => {
-    switch (location.pathname) {
-      case "/":
-        return "home";
-      case "/login":
-        return "login";
-      case "/register":
-        return "register";
-      case "/dashboard":
-        return "dashboard";
-      case "/create-poll":
-        return "create-poll";
-      case "/poll-response":
-        return "poll-response";
-      case "/poll-results":
-        return "poll-results";
-      case "/user":
-        return "user";
-      default:
-        return "home";
-    }
+    if (location.pathname === "/") return "home";
+    if (location.pathname.startsWith("/dashboard")) return "dashboard";
+    if (location.pathname.startsWith("/create-poll")) return "create-poll";
+    if (location.pathname.startsWith("/poll-results")) return "poll-results";
+    if (location.pathname.startsWith("/poll")) return "poll-response";
+    if (location.pathname === "/login") return "login";
+    if (location.pathname === "/register") return "register";
+    if (location.pathname === "/user") return "user";
+    return "home";
   };
 
   const currentPage = getPathName();
+
+  const initials = user?.fullName
+    ? user.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "?";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
@@ -83,7 +78,17 @@ const Navbar = () => {
 
         {/* Desktop buttons */}
         <div className="hidden md:flex items-center gap-3">
-          {!isDashboard ? (
+          {user ? (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate("/user")}
+                className="w-9 h-9 flex items-center cursor-pointer justify-center rounded-full bg-black text-white text-sm font-semibold"
+                title={user.fullName}
+              >
+                {initials}
+              </button>
+            </div>
+          ) : (
             <>
               <button
                 onClick={() => navigate("/login")}
@@ -91,7 +96,6 @@ const Navbar = () => {
               >
                 Sign In
               </button>
-
               <button
                 onClick={() => navigate("/register")}
                 className="px-5 py-2 text-sm font-medium cursor-pointer rounded-full bg-black text-white transition-all duration-200 hover:opacity-90"
@@ -99,15 +103,6 @@ const Navbar = () => {
                 Get Started
               </button>
             </>
-          ) : (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate("/user")}
-                className="w-9 h-9 flex items-center cursor-pointer justify-center rounded-full bg-black text-white text-sm font-semibold"
-              >
-                JD
-              </button>
-            </div>
           )}
         </div>
 
@@ -117,23 +112,9 @@ const Navbar = () => {
           onClick={() => setMenuOpen(!menuOpen)}
         >
           <div className="w-5 flex flex-col gap-1">
-            <span
-              className={`block h-0.5 bg-black transition-all duration-300 ${
-                menuOpen ? "translate-y-1.5 rotate-45" : ""
-              }`}
-            ></span>
-
-            <span
-              className={`block h-0.5 bg-black transition-all duration-300 ${
-                menuOpen ? "opacity-0" : ""
-              }`}
-            ></span>
-
-            <span
-              className={`block h-0.5 bg-black transition-all duration-300 ${
-                menuOpen ? "-translate-y-1.5 -rotate-45" : ""
-              }`}
-            ></span>
+            <span className={`block h-0.5 bg-black transition-all duration-300 ${menuOpen ? "translate-y-1.5 rotate-45" : ""}`}></span>
+            <span className={`block h-0.5 bg-black transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}></span>
+            <span className={`block h-0.5 bg-black transition-all duration-300 ${menuOpen ? "-translate-y-1.5 -rotate-45" : ""}`}></span>
           </div>
         </button>
       </div>
@@ -141,7 +122,7 @@ const Navbar = () => {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden flex flex-col gap-4 px-6 py-4 bg-white border-t border-gray-100">
-          {!isDashboard &&
+          {!isDashboard && !user && (
             ["Features", "Pricing", "About"].map((item) => (
               <span
                 key={item}
@@ -149,29 +130,40 @@ const Navbar = () => {
               >
                 {item}
               </span>
-            ))}
+            ))
+          )}
 
-          <div className="flex flex-col gap-3 pt-4 border-t border-gray-100">
-            <button
-              onClick={() => {
-                navigate("/login");
-                setMenuOpen(false);
-              }}
-              className="w-full py-3 cursor-pointer text-sm font-medium rounded-full border border-gray-200 transition-all duration-200 hover:border-black"
-            >
-              Sign In
-            </button>
-
-            <button
-              onClick={() => {
-                navigate("/register");
-                setMenuOpen(false);
-              }}
-              className="w-full py-3 cursor-pointer text-sm font-medium rounded-full bg-black text-white transition-all duration-200 hover:opacity-90"
-            >
-              Get Started
-            </button>
-          </div>
+          {user ? (
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => { navigate("/dashboard"); setMenuOpen(false); }}
+                className="w-full py-3 cursor-pointer text-sm font-medium rounded-full border border-gray-200 transition-all duration-200 hover:border-black"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => { navigate("/user"); setMenuOpen(false); }}
+                className="w-full py-3 cursor-pointer text-sm font-medium rounded-full border border-gray-200 transition-all duration-200 hover:border-black"
+              >
+                Profile
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 pt-4 border-t border-gray-100">
+              <button
+                onClick={() => { navigate("/login"); setMenuOpen(false); }}
+                className="w-full py-3 cursor-pointer text-sm font-medium rounded-full border border-gray-200 transition-all duration-200 hover:border-black"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { navigate("/register"); setMenuOpen(false); }}
+                className="w-full py-3 cursor-pointer text-sm font-medium rounded-full bg-black text-white transition-all duration-200 hover:opacity-90"
+              >
+                Get Started
+              </button>
+            </div>
+          )}
         </div>
       )}
     </nav>

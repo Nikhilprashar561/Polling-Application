@@ -1,7 +1,10 @@
-import {toast} from "sonner"
+import { toast } from "sonner";
 
 export const axiosError = (error) => {
-    toast.error(
-        error?.response?.data?.message
-    )
-}
+  const message =
+    error?.response?.data?.message
+    console.log("Error ?", message)
+
+  toast.error(message);
+  console.error("API Error:", message, error);
+};

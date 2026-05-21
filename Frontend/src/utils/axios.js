@@ -9,8 +9,7 @@ export const axiosRequest = axios.create({
   withCredentials: true,
 });
 
-// For Each Request Interceptor Before sent
-
+// Attach token to every request
 axios.interceptors.request.use(
   function (config) {
     const accessToken = tokenStore.getAccessToken();

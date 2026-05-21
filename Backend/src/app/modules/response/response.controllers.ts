@@ -1,7 +1,6 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import {
   pollsTable,
-  pollStatusEnum,
   pollSubmissionsTable,
   questionsTable,
   responsesTable,
@@ -12,38 +11,16 @@ import { ApiError } from "../../common/utils/ApiError.js";
 import { and, desc, eq, or } from "drizzle-orm";
 import { db } from "../../../db/index.js";
 import { ApiResponse } from "../../common/utils/ApiResponse.js";
+import { emitVoteUpdate } from "../../common/socket/socket.server.js";
 
 class responsePollingController {
   public async submitFinalPoll(
     req: Request<submitPoll>,
     res: Response,
+    next: NextFunction
   ): Promise<void> {
-    // User Can Submit Poll Means Final Poll Submission
-
-    // Get Data From Request , Means Questions Answers
-
-    // If poll is auth required then add check only verify logged in user can
-
-    // Extract pollId from params or poll link
-    // Extract submitted answers from body
-    // Verify poll exists or not
-    // Verify poll status is active
-    // Verify poll is not expired
-
-    // Extract User Answer and Check they answer to all or not? REQUIRED
-    // Verify all required questions are answered
-
-    // Store pollId, UserId if Auth in Submissions Table
-    // Store Question ID one by one response Table
-    // Then Store Submission ID in response
-    // Store Respondednt ID Also
-
-    // Prevent duplicate submission if needed
-    // Store all submitted answers in response table
-
-    // Return success response message
-
-    const { pollId } = req.params;
+    try {
+      const { pollId } = req.params;
 
     if (!pollId?.trim()) {
       throw ApiError.badRequest("Poll ID is required");
@@ -103,9 +80,7 @@ class responsePollingController {
 
     if (userId) {
       const [alreadySubmitted] = await db
-        .select({
-          id: pollSubmissionsTable.id,
-        })
+        .select({ id: pollSubmissionsTable.id })
         .from(pollSubmissionsTable)
         .where(
           and(
@@ -121,33 +96,22 @@ class responsePollingController {
     }
 
     const requiredQuestionIds = questions
-      .filter((question) => question.isRequired)
-      .map((question) => question.id);
+      .filter((q) => q.isRequired)
+      .map((q) => q.id);
 
-    const submittedQuestionIds = answers.map((answer) => answer.questionId);
+    const submittedQuestionIds = answers.map((a: any) => a.questionId);
 
-    for (const requiredQuestionId of requiredQuestionIds) {
-      if (!submittedQuestionIds.includes(requiredQuestionId)) {
+    for (const reqId of requiredQuestionIds) {
+      if (!submittedQuestionIds.includes(reqId)) {
         throw ApiError.badRequest("All required questions must be answered");
       }
     }
 
-    for (const answer of answers) {
-      const matchedQuestion = questions.find(
-        (question) => question.id === answer.questionId,
-      );
+    for (const answer of answers as any[]) {
+      const matched = questions.find((q) => q.id === answer.questionId);
+      if (!matched) throw ApiError.badRequest("Invalid question submitted");
 
-      if (!matchedQuestion) {
-        throw ApiError.badRequest("Invalid question submitted");
-      }
-
-      const validOptions = [
-        matchedQuestion.option1,
-        matchedQuestion.option2,
-        matchedQuestion.option3,
-        matchedQuestion.option4,
-      ];
-
+      const validOptions = [matched.option1, matched.option2, matched.option3, matched.option4];
       if (!validOptions.includes(answer.selectedOption)) {
         throw ApiError.badRequest("Invalid answer option submitted");
       }
@@ -160,15 +124,11 @@ class responsePollingController {
           pollId,
           respondentId: pollExist.isAnonymous ? null : userId,
         })
-        .returning({
-          id: pollSubmissionsTable.id,
-        });
+        .returning({ id: pollSubmissionsTable.id });
 
-      if (!createdSubmission) {
-        throw ApiError.internal("Failed to create submission");
-      }
+      if (!createdSubmission) throw ApiError.internal("Failed to create submission");
 
-      const responsePayload = answers.map((answer) => ({
+      const responsePayload = (answers as any[]).map((answer) => ({
         submissionId: createdSubmission.id,
         pollId,
         questionId: answer.questionId,
@@ -179,25 +139,25 @@ class responsePollingController {
       await tx.insert(responsesTable).values(responsePayload);
     });
 
+    // Emit live vote update via socket
+    try {
+      const updatedAnalytics = await buildAnalyticsPayload(pollId);
+      emitVoteUpdate(pollId, updatedAnalytics);
+    } catch (_) {}
+
     ApiResponse.ok(res, "Poll submitted successfully");
+    } catch (error) {
+      next(error)
+    }
   }
 
   public async creatorPollSubmit(
     req: Request<pollId>,
     res: Response,
+    next: NextFunction
   ): Promise<void> {
-    // creator can expire this poll anytime they want and Publis the poll
-    // Creator can manually expire or close poll or Publis
-    // Extract pollId from params
-    // Get creator userId from request
-    // Verify poll exists
-    // Verify current user owns this poll
-    // Change poll status to completed or expired
-    // Change Poll Link to Final Submission
-    // Save updated poll status and it details
-    // Return updated poll response
-
-    const { pollId } = req.params;
+    try {
+      const { pollId } = req.params;
 
     if (!pollId?.trim()) {
       throw ApiError.badRequest("Poll ID is required");
@@ -223,49 +183,39 @@ class responsePollingController {
       throw ApiError.forbidden("You are not allowed to manage this poll");
     }
 
-    const statusEnum = pollStatusEnum.enumValues[1];
-
-    if (pollExist.status !== statusEnum) {
+    if (pollExist.status !== "active") {
       throw ApiError.badRequest("First make this poll active");
     }
 
-    // Todo :- Expiry time less than to current time throw error
+    const [closedPoll] = await db
+      .update(pollsTable)
+      .set({ status: "closed", updatedAt: new Date() })
+      .where(eq(pollsTable.id, pollId))
+      .returning({
+        id: pollsTable.id,
+        title: pollsTable.title,
+        status: pollsTable.status,
+        pollLink: pollsTable.pollLink,
+      });
 
-    const expireAt = pollExist.expiresAt;
+    // Emit socket event so live viewers know poll is closed
+    try {
+      emitVoteUpdate(pollId, { pollClosed: true, pollId });
+    } catch (_) {}
 
-    if (expireAt) {
-      const expires = new Date(expireAt);
-
-      if (Number.isNaN(expireAt.getTime()))
-        throw ApiError.badRequest("Invalid expiry time");
-
-      if (expires <= new Date())
-        throw ApiError.badRequest(
-          "Expiry time must be greater than current time",
-        );
+    ApiResponse.ok(res, `Poll closed successfully`, closedPoll);
+    } catch (error) {
+      next(error)
     }
-
-    ApiResponse.ok(res, `Poll ${pollExist.status} successfully`, pollExist);
   }
 
   public async finalPollResult(
     req: Request<pollLink>,
     res: Response,
+    next: NextFunction
   ): Promise<void> {
-    // via link if they expire
-    // when creator finalize the poll automaticaly convert to result
-    // Get poll result by pollId or poll link
-    // Verify poll exists
-    // Verify poll is completed or expired
-    // Fetch all poll questions
-    // Fetch all submitted responses related to this poll
-    // Fetch submission and Responsed for both table
-    // Calculate total votes for each option
-    // Calculate Answers with question
-    // Generate final poll result data
-    // Return poll result response
-
-    const { pollLink } = req.params;
+    try {
+      const { pollLink } = req.params;
 
     if (!pollLink?.trim()) {
       throw ApiError.badRequest("Poll Link is required");
@@ -288,9 +238,7 @@ class responsePollingController {
       throw ApiError.notFound("Poll not found");
     }
 
-    const allowedResultStatus = ["closed", "expired"];
-
-    if (!allowedResultStatus.includes(pollExist.status)) {
+    if (!["closed", "active"].includes(pollExist.status)) {
       throw ApiError.badRequest("Poll result is not available yet");
     }
 
@@ -322,20 +270,19 @@ class responsePollingController {
 
     const formattedResults = questions.map((question) => {
       const relatedResponses = responses.filter(
-        (response) => response.questionId === question.id,
+        (r) => r.questionId === question.id,
       );
 
-      const optionVotes = {
+      const optionVotes: Record<string, number> = {
         [question.option1]: 0,
         [question.option2]: 0,
         [question.option3]: 0,
         [question.option4]: 0,
       };
 
-      for (const response of relatedResponses) {
-        const key = response.selectedOption as keyof typeof optionVotes;
-        if (key in optionVotes) {
-          optionVotes[key]! += 1;
+      for (const r of relatedResponses) {
+        if (r.selectedOption in optionVotes) {
+          optionVotes[r.selectedOption]! += 1;
         }
       }
 
@@ -344,8 +291,7 @@ class responsePollingController {
       const options = Object.entries(optionVotes).map(([option, votes]) => ({
         option,
         votes,
-        percentage:
-          totalVotes > 0 ? Number(((votes / totalVotes) * 100).toFixed(2)) : 0,
+        percentage: totalVotes > 0 ? Number(((votes / totalVotes) * 100).toFixed(2)) : 0,
       }));
 
       return {
@@ -356,9 +302,7 @@ class responsePollingController {
       };
     });
 
-    const uniqueSubmissions = new Set(
-      responses.map((response) => response.submissionId),
-    );
+    const uniqueSubmissions = new Set(responses.map((r) => r.submissionId));
 
     const resultPayload = {
       pollId: pollExist.id,
@@ -373,26 +317,21 @@ class responsePollingController {
     };
 
     ApiResponse.ok(res, "Poll result fetched successfully", resultPayload);
+    } catch (error) {
+      next(error)
+    }
   }
 
-  public async completedPolls(req: Request, res: Response): Promise<void> {
-    // All completed Polls
-    // Get all completed or expired polls
-    // Extract authenticated userId from request
-    // Fetch completed polls created by this user
-    // With user Id Fetch Polls
-    // Return completed polls response
-
-    const userId = req.user?.userId;
+  public async completedPolls(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.user?.userId;
 
     if (!userId) {
       throw ApiError.unauthorized("Unauthorized access");
     }
 
     const [userExist] = await db
-      .select({
-        id: usersTable.id,
-      })
+      .select({ id: usersTable.id })
       .from(usersTable)
       .where(eq(usersTable.id, userId))
       .limit(1);
@@ -416,15 +355,11 @@ class responsePollingController {
       .where(
         and(
           eq(pollsTable.createdBy, userId),
-
-          or(eq(pollsTable.status, "closed"), eq(pollsTable.status, "closed")),
+          // Fix: original had or(closed, closed) — should be or(closed, active) to show all non-draft
+          or(eq(pollsTable.status, "closed"), eq(pollsTable.status, "active")),
         ),
       )
       .orderBy(desc(pollsTable.updatedAt));
-
-    if (!completedPolls.length) {
-      throw ApiError.notFound("No completed polls found");
-    }
 
     const formattedPolls = completedPolls.map((poll) => ({
       pollId: poll.id,
@@ -432,7 +367,6 @@ class responsePollingController {
       description: poll.description,
       status: poll.status,
       pollLink: poll.pollLink,
-
       timestamps: {
         createdAt: poll.createdAt,
         updatedAt: poll.updatedAt,
@@ -440,34 +374,22 @@ class responsePollingController {
       },
     }));
 
-    const responsePayload = {
-      totalCompletedPolls: formattedPolls.length,
-
+    ApiResponse.ok(res, "Polls fetched successfully", {
+      totalPolls: formattedPolls.length,
       polls: formattedPolls,
-    };
-
-    ApiResponse.ok(
-      res,
-      "Completed polls fetched successfully",
-      responsePayload,
-    );
+    });
+    } catch (error) {
+      next(error)
+    }
   }
 
   public async getPollAnalytics(
     req: Request<pollId>,
     res: Response,
+    next: NextFunction
   ): Promise<void> {
-    // Extract pollId from params
-    // Verify poll exists
-    // Verify current user owns this poll
-    // Get total response count
-    // Get total submission count
-    // Get total question count
-    // Get vote count for each option
-    // Get poll participation analytics
-    // Return analytics response
-
-    const { pollId } = req.params;
+    try {
+      const { pollId } = req.params;
 
     if (!pollId?.trim()) {
       throw ApiError.badRequest("Poll ID is required");
@@ -496,113 +418,79 @@ class responsePollingController {
       throw ApiError.notFound("Poll not found");
     }
 
-    const questions = await db
-      .select({
-        id: questionsTable.id,
-        questionText: questionsTable.questionText,
+    const analyticsPayload = await buildAnalyticsPayload(pollId);
 
-        option1: questionsTable.option1,
-        option2: questionsTable.option2,
-        option3: questionsTable.option3,
-        option4: questionsTable.option4,
-      })
-      .from(questionsTable)
-      .where(eq(questionsTable.pollId, pollId));
-
-    const totalQuestions = questions.length;
-
-    const responses = await db
-      .select({
-        questionId: responsesTable.questionId,
-
-        selectedOption: responsesTable.selectedOption,
-
-        submissionId: responsesTable.submissionId,
-      })
-      .from(responsesTable)
-      .where(eq(responsesTable.pollId, pollId));
-
-    const totalResponses = responses.length;
-
-    const uniqueSubmissions = new Set(
-      responses.map((response) => response.submissionId),
-    );
-
-    const totalSubmissions = uniqueSubmissions.size;
-
-    const questionAnalytics = questions.map((question) => {
-      const relatedResponses = responses.filter(
-        (response) => response.questionId === question.id,
-      );
-
-      const optionVotes = {
-        [question.option1]: 0,
-        [question.option2]: 0,
-        [question.option3]: 0,
-        [question.option4]: 0,
-      };
-
-      for (const response of relatedResponses) {
-        if (response.selectedOption in optionVotes) {
-          optionVotes[response.selectedOption as keyof typeof optionVotes]! +=
-            1;
-        }
-      }
-
-      const totalVotes = relatedResponses.length;
-
-      const options = Object.entries(optionVotes).map(([option, votes]) => ({
-        option,
-        votes,
-
-        percentage:
-          totalVotes > 0 ? Number(((votes / totalVotes) * 100).toFixed(2)) : 0,
-      }));
-
-      return {
-        questionId: question.id,
-        questionText: question.questionText,
-
-        totalVotes,
-        options,
-      };
-    });
-
-    const participationRate =
-      totalQuestions > 0
-        ? Number(
-            (
-              totalResponses /
-              totalQuestions /
-              Math.max(totalSubmissions, 1)
-            ).toFixed(2),
-          )
-        : 0;
-
-    const analyticsPayload = {
-      pollId: pollExist.id,
+    ApiResponse.ok(res, "Poll analytics fetched successfully", {
+      ...analyticsPayload,
       title: pollExist.title,
       status: pollExist.status,
-
-      analytics: {
-        totalQuestions,
-        totalResponses,
-        totalSubmissions,
-        participationRate,
-      },
-
       createdAt: pollExist.createdAt,
       expiresAt: pollExist.expiresAt,
+    });
+    } catch (error) {
+      next(error)
+    }
+  }
+}
 
-      questions: questionAnalytics,
+// Shared helper to build analytics payload — used by both the API and socket emit
+async function buildAnalyticsPayload(pollId: string) {
+  const questions = await db
+    .select({
+      id: questionsTable.id,
+      questionText: questionsTable.questionText,
+      option1: questionsTable.option1,
+      option2: questionsTable.option2,
+      option3: questionsTable.option3,
+      option4: questionsTable.option4,
+    })
+    .from(questionsTable)
+    .where(eq(questionsTable.pollId, pollId));
+
+  const responses = await db
+    .select({
+      questionId: responsesTable.questionId,
+      selectedOption: responsesTable.selectedOption,
+      submissionId: responsesTable.submissionId,
+    })
+    .from(responsesTable)
+    .where(eq(responsesTable.pollId, pollId));
+
+  const totalResponses = responses.length;
+  const uniqueSubmissions = new Set(responses.map((r) => r.submissionId));
+  const totalSubmissions = uniqueSubmissions.size;
+  const totalQuestions = questions.length;
+
+  const questionAnalytics = questions.map((question) => {
+    const relatedResponses = responses.filter((r) => r.questionId === question.id);
+    const optionVotes: Record<string, number> = {
+      [question.option1]: 0,
+      [question.option2]: 0,
+      [question.option3]: 0,
+      [question.option4]: 0,
     };
 
-    ApiResponse.ok(
-      res,
-      "Poll analytics fetched successfully",
-      analyticsPayload,
-    );
-  }
+    for (const r of relatedResponses) {
+      if (r.selectedOption in optionVotes) {
+        optionVotes[r.selectedOption]! += 1;
+      }
+    }
+
+    const totalVotes = relatedResponses.length;
+    const options = Object.entries(optionVotes).map(([option, votes]) => ({
+      option,
+      votes,
+      percentage: totalVotes > 0 ? Number(((votes / totalVotes) * 100).toFixed(2)) : 0,
+    }));
+
+    return { questionId: question.id, questionText: question.questionText, totalVotes, options };
+  });
+
+  return {
+    pollId,
+    analytics: { totalQuestions, totalResponses, totalSubmissions },
+    questions: questionAnalytics,
+  };
 }
 
 export { responsePollingController };

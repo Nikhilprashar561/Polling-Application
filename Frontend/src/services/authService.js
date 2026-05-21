@@ -3,16 +3,15 @@ import { axiosRequest } from "../utils/axios";
 import { axiosError } from "../utils/axiosError";
 import { tokenStore } from "../utils/tokenStore";
 
-const accessToken = tokenStore.getAccessToken();
+const getToken = () => tokenStore.getAccessToken();
 
 export const authService = {
   async userRegister(data) {
     try {
       const response = await axiosRequest({
         ...summaryApiAuth.register,
-        data: data,
+        data,
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
@@ -23,12 +22,8 @@ export const authService = {
     try {
       const response = await axiosRequest({
         ...summaryApiAuth.login,
-        data: data,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        data,
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
@@ -39,26 +34,20 @@ export const authService = {
     try {
       const response = await axiosRequest({
         ...summaryApiAuth.logout,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
     }
   },
 
-  async user() {
+  async refreshToken() {
     try {
       const response = await axiosRequest({
         ...summaryApiAuth.refreshToken,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
@@ -69,12 +58,9 @@ export const authService = {
     try {
       const response = await axiosRequest({
         ...summaryApiAuth.updateDetails,
-        data: data,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        data,
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
@@ -85,27 +71,22 @@ export const authService = {
     try {
       const response = await axiosRequest({
         url: `${summaryApiAuth.getMe.url}/${id}`,
-        method: "post",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        method: "get",
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);
     }
   },
 
-  async deleteUser() {
+  async deleteUser(id) {
     try {
       const response = await axiosRequest({
-        ...summaryApiAuth.deleteUser,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        url: `${summaryApiAuth.deleteUser.url}/${id}`,
+        method: "delete",
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-
       return response.data;
     } catch (error) {
       axiosError(error);

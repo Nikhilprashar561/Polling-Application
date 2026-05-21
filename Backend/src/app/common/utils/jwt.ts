@@ -13,7 +13,7 @@ interface RefreshPayload {
 }
 
 export function generateAccessToken(payload: JwtPayload): string {
-  const secret: Secret = process.env.ACCESS_TOKEN_SECRET!;
+  const secret: Secret = process.env.ACCESS_TOKEN_SECRET! || "pollingwebsitetoken";
 
   if (!secret) {
     throw ApiError.notFound("ACCESS_TOKEN_SECRET is not defined");
@@ -29,7 +29,7 @@ export function generateAccessToken(payload: JwtPayload): string {
 export function generateRefreshToken(
   payload: RefreshPayload
 ): string {
-  const secret: Secret = process.env.REFRESH_TOKEN_SECRET!;
+  const secret: Secret = process.env.REFRESH_TOKEN_SECRET! || "pollingwebsitetoken";
 
   if (!secret) {
     throw ApiError.notFound("REFRESH_TOKEN_SECRET is not defined");
