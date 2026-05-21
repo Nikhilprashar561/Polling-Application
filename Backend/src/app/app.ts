@@ -10,10 +10,19 @@ const FRONTEND_URL = process.env.FRONTEND_HOST_URL || "http://localhost:5173";
 
 export function createExpress() {
   const app = express();
-  app.use(cors({
-    origin: FRONTEND_URL,
-    credentials: true,
-  }));
+
+app.use(cors({
+    origin: "https://pollingstack.vercel.app",
+    methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
+    allowedHeaders: [
+        "Content-type",
+        "Authorization",
+        "Pragma",
+        "Cache-control",
+        "Expires"
+    ],
+    credentials: true
+}))
 
   app.use(express.json());
   app.use(cookieParser());
