@@ -7,7 +7,15 @@ const FRONTEND_URL = process.env.FRONTEND_HOST_URL;
 
 export const socketServer = (server: HttpServer) => {
   io = new Server(server, {
-    cors: { credentials: true, origin: FRONTEND_URL },
+    cors: {
+    origin: [
+      "http://localhost:5173",
+      "https://keep-betty-upc-depth.trycloudflare.com",
+      "https://craps-maps-slim-reason.trycloudflare.com" // Frontene
+     ],
+    methods: ["GET", "POST"],
+    credentials: true
+  },
   });
 
   io.on("connection", (socket) => {

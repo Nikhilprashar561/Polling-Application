@@ -1,26 +1,84 @@
-# Polling Application 
+# Polling Application
 
-Today Pending Task
+A full-stack real-time polling platform where users can create polls, share them publicly, collect responses, and view live analytics instantly.
 
-// Configure Backend full with all Api's and Proper Error Handling and React Hook Form Means complete Full Frontend how much we need
+Built with modern technologies like React, Node.js, Express, PostgreSQL, Drizzle ORM, TypeScript, and Socket.io.
 
-// Backend Pending Api Decsion and Wrote one by one How to Complete i that's it 
+---
 
-Note :- At Any cost complete Frontend today no more Days.
+# Features
 
-Today Task :-
+- User Authentication (Register/Login)
+- Create dynamic polls with multiple questions
+- Required / Optional questions support
+- Share poll using unique public link
+- Anonymous or authenticated responses
+- Poll expiration support
+- Real-time analytics using Socket.io
+- Live response updates
+- Responsive modern UI
+- Type-safe backend using TypeScript
+- PostgreSQL database with Drizzle ORM
+- Fast frontend with React + Vite
 
-1. Complete Backend ALL Pending Api's
-2. Complete All Frontend Almost, Whatever it takes fetching request, sending request
-3. Complete ALL Backend Api's Endpoints needed
-4. Figure out how to set websocket on Backend and Frontend
-5. Complete All Frontend API request reposne and display data on pages
-6. Setup socket connection on Both frontend and backend
-7. Optimize Both Backend and Frontend
+---
 
-Toady Step By Step Move 
+# Tech Stack
 
-1. Write Down on Each Api How to complete it it's code step before coding
-2. Complete Question and option Form with Proper react hook form validation
-3. Work on API to complete all API needed.
-4. Work on frontend.
+## Frontend
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router DOM
+- Axios
+- React Hook Form
+
+## Backend
+
+- Node.js
+- Express.js
+- TypeScript
+- PostgreSQL
+- Drizzle ORM
+- Socket.io
+- JWT Authentication
+- Docker
+
+---
+
+# Project Structure
+
+```bash
+Polling-Application/
+│
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── routes/
+│   │   ├── middlewares/
+│   │   ├── db/
+│   │   ├── schema/
+│   │   ├── socket/
+│   │   ├── utils/
+│   │   └── index.ts
+│   │
+│   ├── drizzle/
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── layouts/
+│   │   └── main.tsx
+│   │
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.ts
+│
+└── README.md

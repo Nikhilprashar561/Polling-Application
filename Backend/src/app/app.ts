@@ -11,8 +11,10 @@ const FRONTEND_URL = process.env.FRONTEND_HOST_URL || "http://localhost:5173";
 export function createExpress() {
   const app = express();
 
+  
+
 app.use(cors({
-    origin: "https://pollingstack.vercel.app",
+    origin: "https://keep-betty-upc-depth.trycloudflare.com",
     methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
     allowedHeaders: [
         "Content-type",
