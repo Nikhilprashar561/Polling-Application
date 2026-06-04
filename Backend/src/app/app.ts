@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { errorMiddleware } from "./common/middlewares/error.middleware.js";
 
-const FRONTEND_URL = process.env.FRONTEND_HOST_URL || "http://localhost:5173";
+const FRONTEND_URL = process.env.FRONTEND_HOST_URL || "https://pollingstack.vercel.app";
 
 export function createExpress() {
   const app = express();
@@ -14,7 +14,7 @@ export function createExpress() {
   
 
 app.use(cors({
-    origin: "https://keep-betty-upc-depth.trycloudflare.com",
+    origin: "https://pollingstack.vercel.app",
     methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
     allowedHeaders: [
         "Content-type",

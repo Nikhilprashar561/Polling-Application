@@ -434,7 +434,7 @@ class pollingContoller {
       }
 
       ApiResponse.ok(res, "Poll updated successfully", updatedPoll);
-    } catch (error) {
+    } catch (error) { 
       next(error);
     }
   }

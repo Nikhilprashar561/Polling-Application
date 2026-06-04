@@ -10,8 +10,7 @@ export const socketServer = (server: HttpServer) => {
     cors: {
     origin: [
       "http://localhost:5173",
-      "https://keep-betty-upc-depth.trycloudflare.com",
-      "https://craps-maps-slim-reason.trycloudflare.com" // Frontene
+      "http://localhost:3000",
      ],
     methods: ["GET", "POST"],
     credentials: true
